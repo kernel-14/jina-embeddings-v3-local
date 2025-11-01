@@ -1,3 +1,78 @@
+# 部署流程
+本项目使用 FastAPI 框架在本地部署 jinaai/jina-embeddings-v3 模型，并提供一个与 Jina 官方 API 格式兼容的 POST /embd 接口。
+
+服务器代码: server_main.py
+
+测试脚本 : test_embd.py
+
+## 必要包安装
+
+### 创建 Conda 环境
+```bash
+# 创建一个环境 jina_project
+conda create -n jina_project python=3.10
+conda activate jina_project
+
+```
+
+### 安装PyTorch
+
+```Bash
+conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+```
+
+### 安装其他Python依赖
+
+这些是 server_main.py 和 test_embd.py 运行所必需的包。
+
+```Bash
+
+pip install fastapi uvicorn sentence-transformers einops huggingface-hub regex
+
+```
+
+fastapi: Web 框架。
+
+uvicorn: ASGI 服务器，用于启动 fastapi。
+
+sentence-transformers: 模型加载器。
+
+einops: jina-embeddings-v3 模型的必需依赖。
+
+huggingface-hub: 用于登录 Hugging Face。
+
+regex: test_embd.py 脚本中的 trim_symbols 函数需要。
+
+## 部署流程
+
+### 启动 API 服务器
+在终端运行 uvicorn 来启动 server_main.py：
+
+```Bash
+uvicorn server_main:app --host 0.0.0.0 --port 8000
+```
+请保持此终端不要关闭。
+
+成功启动后，你将看到 Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)。
+
+（首次启动会自动下载模型，后续启动会非常快。）
+
+服务器启动后，打开浏览器访问 http://127.0.0.1:8000/docs 即可看到 FastAPI 自动生成的交互式 API 文档。
+
+### 运行测试脚本
+打开一个新的终端，激活同一个 conda 环境，运行 test_embd.py来测试：
+
+```Bash
+
+python test_embd.py
+```
+
+此脚本会调用 http://127.0.0.1:8000/embd 并打印出服务器返回的原始 JSON。
+
+你会看到类似 http://127.0.0.1:8000 "POST /embd HTTP/1.1" 200 OK 的成功日志。
+
+同时，终端 1（服务器）也会打印出 INFO: 127.0.0.1:..... - "POST /embd HTTP/1.1" 200 OK 的访问记录。
+
 # API文档
 
 ## 1. 接口概述
@@ -81,3 +156,4 @@
   ],
 }
 ```
+
